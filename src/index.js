@@ -1,18 +1,11 @@
 import express from "express"
 import dotenv from "dotenv";
 import connectionDB from "./db/index.js";
-import { router as userRoutes } from './routes/userRoutes.js';
-
-// import path from "path";
-// import { fileURLToPath } from "url";
+import listEndpoints from 'express-list-endpoints';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express()
 dotenv.config();
-
-// app.set("view engine", "ejs")
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-// app.set("views", path.join(__dirname, "views"))
 
 app.get('/', (req, res) => {
 	res.send(`
@@ -47,7 +40,7 @@ app.get('/', (req, res) => {
 					</head>
 					<body>
 							<div class="container">
-									<h1>Welcome to the Hospital Management System</h1>
+									<h1>Welcome DEMO!!</h1>
 									<p>The backend server is running!</p>
 							</div>
 					</body>
@@ -55,7 +48,10 @@ app.get('/', (req, res) => {
 	`);
 });
 
-app.use('users', userRoutes)
+app.use(express.json());
+app.use('/users', userRoutes);
+
+console.log(listEndpoints(app));
 
 connectionDB();
 
