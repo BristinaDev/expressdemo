@@ -3,9 +3,53 @@ import dotenv from "dotenv";
 import connectionDB from "./db/index.js";
 import listEndpoints from 'express-list-endpoints';
 import userRoutes from './routes/userRoutes.js';
+import { graphqlHTTP } from "express-graphql";
+import User from './models/users.model.js';
+
+import {
+	graphql,
+	GraphQLSchema,
+	GraphQLObjectType,
+	GraphQLString,
+	GraphQLID,
+	GraphQLList
+} from 'graphql';
 
 const app = express()
 dotenv.config();
+
+app.use(express.json());
+app.use('/users', userRoutes);
+
+const UserType = new GraphQLObjectType({
+	name: 'User',
+	fields: {
+		id: {type: GraphQLID},
+		fullname: {type: GraphQLString},
+		username: {type: GraphQLString},
+		email: {type: GraphQLString}
+	}
+})
+// GraphQL schema
+const RootQueryType = new GraphQLObjectType({
+  name: 'Query',
+  fields: {
+		users: {
+      type: new GraphQLList(UserType),
+      resolve: () => User.find()
+    }
+  },
+});
+
+const schema = new GraphQLSchema({
+  query: RootQueryType,
+});
+
+// GraphQL endpoint
+app.use('/graphql', graphqlHTTP({
+  schema: schema,
+  graphiql: true,
+}));
 
 app.get('/', (req, res) => {
 	res.send(`
@@ -47,9 +91,6 @@ app.get('/', (req, res) => {
 			</html>
 	`);
 });
-
-app.use(express.json());
-app.use('/users', userRoutes);
 
 console.log(listEndpoints(app));
 
