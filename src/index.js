@@ -1,8 +1,10 @@
 import express from "express"
 import dotenv from "dotenv";
 import connectionDB from "./db/index.js";
+import multer from 'multer'
 import listEndpoints from 'express-list-endpoints';
 import userRoutes from './routes/userRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { graphqlHTTP } from "express-graphql";
 import User from './models/users.model.js';
 
@@ -15,11 +17,31 @@ import {
 	GraphQLList
 } from 'graphql';
 
+const storage = multer.diskStorage({
+	destination: function(req, file, cb) {
+		cb(null, 'uploads/')
+	},
+	filename: function(req, file, cb){
+		const uniqueSuffix = Date.now() 
+		cb(null, uniqueSuffix+file.originalname)
+	}
+})
+
+const upload = multer({storage: storage})
 const app = express()
 dotenv.config();
 
 app.use(express.json());
 app.use('/users', userRoutes);
+app.use('/auth', authRoutes)
+
+app.post('/api/file-upload', upload.single('file'), (req, res) => {
+	try{
+    res.status(200).json({success: "File Upload Sucessfulll..."});
+	}catch(error){
+    res.status(500).json({ error: error});
+	};
+});
 
 const UserType = new GraphQLObjectType({
 	name: 'User',
@@ -54,34 +76,6 @@ app.use('/graphql', graphqlHTTP({
 app.get('/', (req, res) => {
 	res.send(`
 			<html>
-					<head>
-							<title>Hospital Management System</title>
-							<style>
-									body {
-											font-family: Arial, sans-serif;
-											background-color: #f4f4f4;
-											margin: 0;
-											padding: 0;
-											display: flex;
-											justify-content: center;
-											align-items: center;
-											height: 100vh;
-									}
-									.container {
-											text-align: center;
-											background: white;
-											padding: 20px;
-											border-radius: 8px;
-											box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-									}
-									h1 {
-											color: #333;
-									}
-									p {
-											color: #666;
-									}
-							</style>
-					</head>
 					<body>
 							<div class="container">
 									<h1>Welcome DEMO!!</h1>
