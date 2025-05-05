@@ -1,4 +1,5 @@
 import User from "../models/users.model.js";
+// import sendMail  from "../utils/sendMail.js";
 
 //Create users
 const createUser = async (req, res) => {
@@ -6,6 +7,14 @@ const createUser = async (req, res) => {
     const { username, email, fullname, password } = req.body;
     const newUser = new User({ username, email, fullname, password });
     const savedUser = await newUser.save();
+
+    // await sendMail({
+    //   to: email,
+    //   subject: 'Welcome to Our App!',
+    //   text: `Hi ${fullname}, welcome to our platform.`,
+    //   html: `<p>Hi <strong>${fullname}</strong>,</p><p>Welcome to our app!</p>`,
+    // });
+
     res.status(201).json(savedUser);
   } catch (error) {
     res.status(500).json({ message: "Error creating user", error });
